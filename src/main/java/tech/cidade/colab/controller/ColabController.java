@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.cidade.colab.document.ColabSupport;
 import tech.cidade.colab.dto.request.CreateColabRequest;
+import tech.cidade.colab.dto.response.ColabResponse;
 import tech.cidade.colab.service.ColabService;
-import tech.cidade.colab.service.ColabSupportsService;
 import tech.cidade.colab.service.SupportService;
 
 import java.net.URI;
@@ -31,5 +30,11 @@ public class ColabController {
     public ResponseEntity<Void> supportColab(@PathVariable String colabId, @PathVariable String userId) {
         supportService.updateSupport(colabId, userId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(path = "/{colabId}")
+    public ResponseEntity<ColabResponse> getColab(@PathVariable String colabId) {
+        ColabResponse colabResponse = colabService.getById(colabId);
+        return ResponseEntity.ok(colabResponse);
     }
 }
