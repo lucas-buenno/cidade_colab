@@ -1,0 +1,14 @@
+package tech.cidade.colab.enums;
+
+public enum ECategoryGroup {
+    ROADS_AND_SIDEWALKS,
+    PUBLIC_LIGHTING,
+    SANITATION,
+    WATER_INFRASTRUCTURE,
+    URBAN_VEGETATION,
+    PUBLIC_SPACES,
+    ACCESSIBILITY_AND_MOBILITY,
+    PUBLIC_SAFETY,
+    ANIMAL_WELFARE,
+    OTHER
+}
