@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import tech.cidade.colab.dto.response.ColabResponse;
+import tech.cidade.colab.dto.response.FeedPageResponse;
 import tech.cidade.colab.service.FeedService;
 
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,9 +20,11 @@ public class FeedController {
     private final FeedService feedService;
 
     @GetMapping
-    public ResponseEntity<List<ColabResponse>> getFeed() {
-        log.info("Recebendo requisição para buscar feed de colabs");
-        List<ColabResponse> feed = feedService.getFeed();
+    public ResponseEntity<FeedPageResponse> getFeed(
+            @RequestParam(required = false) String pageToken,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Recebendo requisição para buscar feed de colabs - pageToken: {} - size: {}", pageToken, size);
+        FeedPageResponse feed = feedService.getFeed(pageToken, size);
         return ResponseEntity.ok(feed);
     }
 }

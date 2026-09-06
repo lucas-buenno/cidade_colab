@@ -3,6 +3,7 @@ package tech.cidade.colab.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import tech.cidade.colab.document.Colab;
 import tech.cidade.colab.dto.Location;
@@ -52,6 +53,14 @@ public class ColabService {
         ColabResponse response = mapToResponse(colab);
         log.info("ColabResponse mapeado: {}", response);
         return response;
+    }
+
+    public List<Colab> findRecentColabs(int limit) {
+        return colabRepository.findAllByOrderByIdDesc(PageRequest.of(0, limit));
+    }
+
+    public List<Colab> findRecentColabsBeforeId(String id, int limit) {
+        return colabRepository.findByIdLessThanOrderByIdDesc(id, PageRequest.of(0, limit));
     }
 
     private  ColabResponse mapToResponse(Colab colab) {

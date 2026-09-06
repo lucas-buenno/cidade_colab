@@ -50,3 +50,4 @@ keycloak_data/
 Thumbs.db
 mvnw
 mvnw.cmd
+.gitattributes
