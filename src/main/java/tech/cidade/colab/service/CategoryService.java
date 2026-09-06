@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tech.cidade.colab.document.Category;
+import tech.cidade.colab.dto.response.CategoryResponse;
 import tech.cidade.colab.repository.CategoryRepository;
 
 import java.util.List;
@@ -14,6 +15,24 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+
+    public List<CategoryResponse> getCategories(boolean includeInactive) {
+        log.info("Buscando todas as categorias ativas");
+        List<Category> categories = (List<Category>) categoryRepository.findAll();
+        log.info("Categorias totais encontradas: {}", categories.size());
+
+        if (includeInactive) {
+            return categories.stream().map(CategoryResponse::from).toList();
+        }
+
+        List<CategoryResponse> categoryResponses = categories.stream()
+                .filter(Category::isActive)
+                .map(CategoryResponse::from)
+                .toList();
+
+        log.info("Categorias ativas encontradas: {}", categoryResponses.size());
+        return categoryResponses;
+    }
 
     public List<Category> getCategoriesById(List<String> slugs) {
         log.info("Buscando categorias por slugs: {}", slugs);
