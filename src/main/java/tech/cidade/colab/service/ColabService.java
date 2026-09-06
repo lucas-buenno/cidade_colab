@@ -26,10 +26,10 @@ public class ColabService {
     private final CategoryService categoryService;
     private final SupportService supportService;
 
-    public String createColab(CreateColabRequest request) {
+    public String createColab(CreateColabRequest request, String authenticatedUserId) {
         log.info("Criando colab com os dados: {}", request);
         Colab colabToSave = new Colab()
-                .setUserId(request.userId())
+                .setUserId(authenticatedUserId)
                 .setTitle(request.title())
                 .setDescription(request.description())
                 .setCategories(request.categoriesSlugs())
@@ -41,7 +41,7 @@ public class ColabService {
 
         Colab created = colabRepository.save(colabToSave);
         log.info("Colab criado com sucesso: {} - Criado em: {}", created, created.getCreatedAt());
-        supportService.updateSupport(created.getId(), request.userId());
+        supportService.updateSupport(created.getId(), authenticatedUserId);
         return created.getId();
     }
 
