@@ -4,9 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.cidade.colab.dto.response.ColabResponse;
+import tech.cidade.colab.dto.response.UserResponse;
 import tech.cidade.colab.repository.UserRepository;
 import tech.cidade.colab.dto.request.CreateUserRequest;
 import tech.cidade.colab.document.User;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +19,7 @@ public class UserService {
 
     private final KeycloakAuthService keycloakService;
     private final UserRepository userRepository;
+    private final ColabService colabService;
 
     @Transactional
     public String createUser(CreateUserRequest request) {
@@ -30,6 +35,14 @@ public class UserService {
         userRepository.save(user);
         log.info("Usuário criado com sucesso no banco de dados com username {} e id {}", request.username(), userId);
         return user.getId();
+    }
+
+    public UserResponse getUserById(String userId) {
+        log.info("Buscando usuário com id: {}", userId);
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + userId));
+        List<ColabResponse> userColabs = colabService.getColabsByUserId(userId);
+        log.info("Usuário encontrado: {} - Quantidade de colabs: {}", user, userColabs.size());
+        return new UserResponse(user.getUsername(), user.getCreatedAt(), userColabs);
     }
 
     private void validateUserData(CreateUserRequest request) {

@@ -7,7 +7,9 @@ import tech.cidade.colab.document.Colab;
 import java.util.List;
 
 public interface ColabRepository extends CrudRepository<Colab, String> {
-    List<Colab> findAllByOrderByIdDesc(Pageable pageable);
+    List<Colab> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    List<Colab> findByIdLessThanOrderByIdDesc(String id, Pageable pageable);
+    List<Colab> findByIdLessThanOrderByCreatedAtDesc(String id, Pageable pageable);
+
+    List<Colab> findByUserIdOrderByCreatedAtDesc(String userId);
 }

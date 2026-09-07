@@ -57,12 +57,24 @@ public class ColabService {
         return response;
     }
 
+    public List<ColabResponse> getColabsByUserId(String userId) {
+        log.info("Buscando colabs do usuário com id: {}", userId);
+        List<Colab> colabs = colabRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        log.info("Colabs encontrados: {}", colabs.size());
+
+        List<ColabResponse> responses = colabs.stream()
+                .map(this::generateColabResponse)
+                .toList();
+        log.info("Colabs mapeados para ColabResponse: {}", responses.size());
+        return responses;
+    }
+
     public List<Colab> findRecentColabs(int limit) {
-        return colabRepository.findAllByOrderByIdDesc(PageRequest.of(0, limit));
+        return colabRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(0, limit));
     }
 
     public List<Colab> findRecentColabsBeforeId(String id, int limit) {
-        return colabRepository.findByIdLessThanOrderByIdDesc(id, PageRequest.of(0, limit));
+        return colabRepository.findByIdLessThanOrderByCreatedAtDesc(id, PageRequest.of(0, limit));
     }
 
     private  ColabResponse generateColabResponse(Colab colab) {
