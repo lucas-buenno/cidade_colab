@@ -21,6 +21,7 @@ public class FeedService {
 
     private final ColabService colabService;
     private final CategoryService categoryService;
+    private final CloudinaryService cloudinaryService;
 
     public FeedPageResponse getFeed(String pageToken, int size) {
         int safeSize = validateAndNormalizeSize(size);
@@ -63,9 +64,14 @@ public class FeedService {
                         colab.getSupportCount(),
                         colab.getLocation(),
                         colab.getCreatedAt(),
-                        colab.getUpdatedAt()
+                        colab.getUpdatedAt(),
+                        getImageUrl(colab.getImageKey())
                 ))
                 .toList();
+    }
+
+    private String getImageUrl(String imageKey) {
+        return cloudinaryService.getImageUrl(imageKey);
     }
 
     private List<CategoryResponse> mapCategories(List<String> slugs) {

@@ -6,10 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tech.cidade.colab.dto.request.CreateColabRequest;
 import tech.cidade.colab.dto.response.ColabResponse;
+import tech.cidade.colab.dto.response.UploadImageResponse;
 import tech.cidade.colab.service.ColabService;
 import tech.cidade.colab.service.SupportService;
+import tech.cidade.colab.service.CloudinaryService;
 
 import java.net.URI;
 
@@ -21,6 +24,20 @@ public class ColabController {
 
     private final ColabService colabService;
     private final SupportService supportService;
+    private final CloudinaryService uploadService;
+
+    @PostMapping(path = "/prepare")
+    public ResponseEntity<UploadImageResponse> prepareColabImageUpload(@RequestParam("file") MultipartFile file) {
+        try {
+            byte[] fileBytes = file.getBytes();
+            String fileName = file.getOriginalFilename();
+            UploadImageResponse uploadImageResponse = uploadService.uploadFile(fileBytes, fileName);
+            return ResponseEntity.ok(uploadImageResponse);
+        } catch (Exception e) {
+            log.error("Erro ao fazer upload do arquivo: {}", file.getOriginalFilename(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
 
     @PostMapping(path = "/create")
     public ResponseEntity<Void> createColab(@RequestBody CreateColabRequest request,

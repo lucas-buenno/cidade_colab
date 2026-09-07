@@ -16,5 +16,6 @@ public record ColabResponse(
         Integer supportCount,
         Location location,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        String imageUrl) {
 }
