@@ -8,7 +8,6 @@ import tech.cidade.colab.document.Colab;
 import tech.cidade.colab.document.User;
 import tech.cidade.colab.dto.Location;
 import tech.cidade.colab.dto.request.CreateColabRequest;
-import tech.cidade.colab.dto.response.CategoryResponse;
 import tech.cidade.colab.dto.response.ColabResponse;
 import tech.cidade.colab.dto.response.UserResponse;
 import tech.cidade.colab.enums.EColabStatus;
@@ -17,6 +16,7 @@ import tech.cidade.colab.repository.ColabRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -52,31 +52,37 @@ public class ColabService extends AbstractColabService{
         return created.getId();
     }
 
-    public ColabResponse getById(String colabId) {
+    public ColabResponse getById(String colabId, String authenticatedUserId) {
         log.info("Buscando colab com id: {}", colabId);
         Colab colab = colabRepository.findById(colabId).orElseThrow(() -> new RuntimeException("Colab não encontrado com id: " + colabId));
         log.info("Colab encontrado: {}", colab);
 
-        ColabResponse response = generateColabResponse(colab);
+        boolean supportedByMe = supportService.isSupportedBy(colabId, authenticatedUserId);
+        ColabResponse response = generateColabResponse(colab, supportedByMe);
         log.info("ColabResponse mapeado: {}", response);
         return response;
     }
 
-    public UserResponse getColabsByUserId(String userId) {
+    public UserResponse getColabsByUserId(String userId, String authenticatedUserId) {
         log.info("Buscando usuário com id: {}", userId);
         User user = userService.getUserById(userId);
-        List<ColabResponse> userColabs = getColabs(userId);
+        List<ColabResponse> userColabs = getColabs(userId, authenticatedUserId);
         log.info("Usuário encontrado: {} - Quantidade de colabs: {}", user, userColabs.size());
         return new UserResponse(user.getUsername(), user.getCreatedAt(), userColabs);
     }
 
-    private List<ColabResponse> getColabs(String userId) {
+    private List<ColabResponse> getColabs(String userId, String authenticatedUserId) {
         log.info("Buscando colabs do usuário com id: {}", userId);
         List<Colab> colabs = colabRepository.findByUserIdOrderByCreatedAtDesc(userId);
         log.info("Colabs encontrados: {}", colabs.size());
 
+        Set<String> supportedIds = supportService.findSupportedColabIds(
+                authenticatedUserId,
+                colabs.stream().map(Colab::getId).toList()
+        );
+
         List<ColabResponse> responses = colabs.stream()
-                .map(this::generateColabResponse)
+                .map(colab -> generateColabResponse(colab, supportedIds.contains(colab.getId())))
                 .toList();
         log.info("Colabs mapeados para ColabResponse: {}", responses.size());
         return responses;

@@ -15,6 +15,7 @@ public record ColabResponse(
         List<CategoryResponse> categories,
         EColabStatus status,
         Integer supportCount,
+        boolean supportedByMe,
         Location location,
         Instant createdAt,
         Instant updatedAt,

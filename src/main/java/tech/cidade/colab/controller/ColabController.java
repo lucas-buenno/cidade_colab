@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tech.cidade.colab.dto.request.CreateColabRequest;
 import tech.cidade.colab.dto.response.ColabResponse;
+import tech.cidade.colab.dto.response.SupportResponse;
 import tech.cidade.colab.dto.response.UploadImageResponse;
 import tech.cidade.colab.dto.response.UserResponse;
 import tech.cidade.colab.service.ColabService;
@@ -48,21 +49,25 @@ public class ColabController {
     }
 
     @PutMapping(path = "/support/{colabId}")
-    public ResponseEntity<Void> supportColab(@PathVariable String colabId,
+    public ResponseEntity<SupportResponse> supportColab(@PathVariable String colabId,
                                              @AuthenticationPrincipal Jwt jwt) {
-        supportService.updateSupport(colabId, jwt.getSubject());
-        return ResponseEntity.ok().build();
+        SupportResponse supportResponse = supportService.updateSupport(colabId, jwt.getSubject());
+        return ResponseEntity.ok(supportResponse);
     }
 
     @GetMapping(path = "/{colabId}")
-    public ResponseEntity<ColabResponse> getColab(@PathVariable String colabId) {
-        ColabResponse colabResponse = colabService.getById(colabId);
+    public ResponseEntity<ColabResponse> getColab(@PathVariable String colabId,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+        String authenticatedUserId = jwt != null ? jwt.getSubject() : null;
+        ColabResponse colabResponse = colabService.getById(colabId, authenticatedUserId);
         return ResponseEntity.ok(colabResponse);
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
-        UserResponse userResponse = colabService.getColabsByUserId(userId);
+    public ResponseEntity<UserResponse> getUser(@PathVariable String userId,
+                                                @AuthenticationPrincipal Jwt jwt) {
+        String authenticatedUserId = jwt != null ? jwt.getSubject() : null;
+        UserResponse userResponse = colabService.getColabsByUserId(userId, authenticatedUserId);
         return ResponseEntity.ok(userResponse);
     }
 }

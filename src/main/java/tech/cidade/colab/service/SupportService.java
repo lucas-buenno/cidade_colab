@@ -10,10 +10,14 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import tech.cidade.colab.document.Colab;
 import tech.cidade.colab.document.ColabSupport;
+import tech.cidade.colab.dto.response.SupportResponse;
 import tech.cidade.colab.repository.ColabRepository;
 import tech.cidade.colab.repository.ColabSupportRepository;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,17 +29,40 @@ public class SupportService {
     private final ColabSupportRepository colabSupportRepository;
 
 
-    public void updateSupport(String colabId, String userId) {
+    public SupportResponse updateSupport(String colabId, String userId) {
         log.info("Atualizando suporte do colab {} pelo usuário {}", colabId, userId);
         colabRepository.findById(colabId).orElseThrow(() -> new RuntimeException("Colab não encontrado: " + colabId));
         boolean alreadySupported = colabSupportRepository.existsByColabIdAndUserId(colabId, userId);
         if (alreadySupported) {
             log.info("Usuário {} já apoiou o colab {}, removendo suporte", userId, colabId);
             removeSupport(colabId, userId);
-            return;
+        } else {
+            log.info("Usuário {} ainda não apoiou o colab {}, adicionando suporte", userId, colabId);
+            addSupport(colabId, userId);
         }
-        log.info("Usuário {} ainda não apoiou o colab {}, adicionando suporte", userId, colabId);
-        addSupport(colabId, userId);
+        return currentSupport(colabId, userId);
+    }
+
+    public boolean isSupportedBy(String colabId, String userId) {
+        if (userId == null || userId.isBlank()) {
+            return false;
+        }
+        return colabSupportRepository.existsByColabIdAndUserId(colabId, userId);
+    }
+
+    public Set<String> findSupportedColabIds(String userId, Collection<String> colabIds) {
+        if (userId == null || userId.isBlank() || colabIds == null || colabIds.isEmpty()) {
+            return Set.of();
+        }
+        return colabSupportRepository.findByUserIdAndColabIdIn(userId, colabIds).stream()
+                .map(ColabSupport::getColabId)
+                .collect(Collectors.toSet());
+    }
+
+    private SupportResponse currentSupport(String colabId, String userId) {
+        Colab colab = colabRepository.findById(colabId)
+                .orElseThrow(() -> new RuntimeException("Colab não encontrado: " + colabId));
+        return new SupportResponse(colab.getSupportCount(), isSupportedBy(colabId, userId));
     }
 
     private void addSupport(String colabId, String userId) {

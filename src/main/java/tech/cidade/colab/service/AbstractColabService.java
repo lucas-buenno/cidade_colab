@@ -16,7 +16,7 @@ public abstract class AbstractColabService {
     protected final UserService userService;
     protected final CategoryService categoryService;
 
-    protected ColabResponse generateColabResponse(Colab colab) {
+    protected ColabResponse generateColabResponse(Colab colab, boolean supportedByMe) {
         String username = userService.getUserById(colab.getUserId()).getUsername();
         String imageUrl = cloudinaryService.getImageUrl(colab.getImageKey());
         return new ColabResponse(
@@ -28,6 +28,7 @@ public abstract class AbstractColabService {
                 mapCategories(colab.getCategories()),
                 colab.getStatus(),
                 colab.getSupportCount(),
+                supportedByMe,
                 colab.getLocation(),
                 colab.getCreatedAt(),
                 colab.getUpdatedAt(),
