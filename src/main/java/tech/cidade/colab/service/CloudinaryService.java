@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tech.cidade.colab.dto.response.UploadImageResponse;
+import tech.cidade.colab.utils.FileUtils;
 import tech.cidade.colab.utils.JwtUtils;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class CloudinaryService {
     public UploadImageResponse uploadFile(byte[] fileBytes, String fileName) {
 
         try {
+            FileUtils.validateFile(fileBytes);
             String colabId = UUID.randomUUID().toString();
             String imageKey = generateColabImagePublicId(colabId);
 
@@ -56,6 +58,8 @@ public class CloudinaryService {
                 ObjectUtils.asMap(
                         "public_id", imageKey,
                         "resource_type", "image",
+                        "type", "upload",
+                        "access_mode", "public",
                         "overwrite", false,
                         "asset_folder", imageKey
                 )
@@ -63,10 +67,11 @@ public class CloudinaryService {
     }
 
     private String getFinalUrl(Map<?, ?> uploadResult) {
-
-        String secureUrl = uploadResult.get("secure_url").toString();
-        String url = uploadResult.get("url").toString();
-        String finalUrl = secureUrl != null ? secureUrl : url;
+        Object secureUrlObj = uploadResult.get("secure_url");
+        Object urlObj = uploadResult.get("url");
+        String secureUrl = secureUrlObj != null ? secureUrlObj.toString() : null;
+        String url = urlObj != null ? urlObj.toString() : null;
+        String finalUrl = (secureUrl != null && !secureUrl.isBlank()) ? secureUrl : url;
 
         if (finalUrl == null || finalUrl.isBlank()) {
             throw new IllegalStateException("Cloudinary não retornou URL da imagem");

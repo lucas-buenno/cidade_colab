@@ -15,13 +15,15 @@ import java.util.List;
 import static tech.cidade.colab.utils.CursorUtils.validateAndNormalizeSize;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class FeedService {
+public class FeedService extends AbstractColabService{
 
     private final ColabService colabService;
-    private final CategoryService categoryService;
-    private final CloudinaryService cloudinaryService;
+
+    public FeedService(CloudinaryService cloudinaryService, UserService userService, CategoryService categoryService, ColabService colabService) {
+        super(cloudinaryService, userService, categoryService);
+        this.colabService = colabService;
+    }
 
     public FeedPageResponse getFeed(String pageToken, int size) {
         int safeSize = validateAndNormalizeSize(size);
@@ -54,32 +56,7 @@ public class FeedService {
 
     private List<ColabResponse> mapToColabResponse(List<Colab> pageItems) {
         return pageItems.stream()
-                .map(colab -> new ColabResponse(
-                        colab.getId(),
-                        colab.getUserId(),
-                        colab.getTitle(),
-                        colab.getDescription(),
-                        mapCategories(colab.getCategories()),
-                        colab.getStatus(),
-                        colab.getSupportCount(),
-                        colab.getLocation(),
-                        colab.getCreatedAt(),
-                        colab.getUpdatedAt(),
-                        getImageUrl(colab.getImageKey())
-                ))
+                .map(this::generateColabResponse)
                 .toList();
-    }
-
-    private String getImageUrl(String imageKey) {
-        return cloudinaryService.getImageUrl(imageKey);
-    }
-
-    private List<CategoryResponse> mapCategories(List<String> slugs) {
-        log.info("Mapeando categorias para slugs: {}", slugs);
-        List<CategoryResponse> categories = categoryService.getCategoriesById(slugs).stream()
-                .map(CategoryResponse::from)
-                .toList();
-        log.info("Categorias mapeadas: {}", categories);
-        return categories;
     }
 }

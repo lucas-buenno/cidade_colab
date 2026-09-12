@@ -19,7 +19,6 @@ public class UserService {
 
     private final KeycloakAuthService keycloakService;
     private final UserRepository userRepository;
-    private final ColabService colabService;
 
     @Transactional
     public String createUser(CreateUserRequest request) {
@@ -37,13 +36,13 @@ public class UserService {
         return user.getId();
     }
 
-    public UserResponse getUserById(String userId) {
+    public User getUserById(String userId) {
         log.info("Buscando usuário com id: {}", userId);
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuário não encontrado com id: " + userId));
-        List<ColabResponse> userColabs = colabService.getColabsByUserId(userId);
-        log.info("Usuário encontrado: {} - Quantidade de colabs: {}", user, userColabs.size());
-        return new UserResponse(user.getUsername(), user.getCreatedAt(), userColabs);
+        log.info("Usuário encontrado: {}", user);
+        return user;
     }
+
 
     private void validateUserData(CreateUserRequest request) {
 

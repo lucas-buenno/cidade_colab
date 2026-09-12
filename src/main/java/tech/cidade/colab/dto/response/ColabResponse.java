@@ -9,6 +9,7 @@ import java.util.List;
 public record ColabResponse(
         String id,
         String userId,
+        String username,
         String title,
         String description,
         List<CategoryResponse> categories,

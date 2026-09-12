@@ -24,10 +24,4 @@ public class UserController {
         String id = userService.createUser(request);
         return ResponseEntity.created(URI.create("/users/" + id)).build();
     }
-
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
-        UserResponse userResponse = userService.getUserById(userId);
-        return ResponseEntity.ok(userResponse);
-    }
 }

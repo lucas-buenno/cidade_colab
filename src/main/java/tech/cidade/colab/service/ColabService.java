@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import tech.cidade.colab.document.Colab;
+import tech.cidade.colab.document.User;
 import tech.cidade.colab.dto.Location;
 import tech.cidade.colab.dto.request.CreateColabRequest;
 import tech.cidade.colab.dto.response.CategoryResponse;
 import tech.cidade.colab.dto.response.ColabResponse;
+import tech.cidade.colab.dto.response.UserResponse;
 import tech.cidade.colab.enums.EColabStatus;
 import tech.cidade.colab.repository.ColabRepository;
 
@@ -18,13 +20,16 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class ColabService {
+public class ColabService extends AbstractColabService{
 
     private final ColabRepository colabRepository;
-    private final CategoryService categoryService;
     private final SupportService supportService;
-    private final CloudinaryService cloudinaryService;
+
+    public ColabService(CloudinaryService cloudinaryService, UserService userService, CategoryService categoryService, ColabRepository colabRepository, SupportService supportService) {
+        super(cloudinaryService, userService, categoryService);
+        this.colabRepository = colabRepository;
+        this.supportService = supportService;
+    }
 
     public String createColab(CreateColabRequest request, String authenticatedUserId) {
         log.info("Criando colab com os dados: {}", request);
@@ -57,7 +62,15 @@ public class ColabService {
         return response;
     }
 
-    public List<ColabResponse> getColabsByUserId(String userId) {
+    public UserResponse getColabsByUserId(String userId) {
+        log.info("Buscando usuário com id: {}", userId);
+        User user = userService.getUserById(userId);
+        List<ColabResponse> userColabs = getColabs(userId);
+        log.info("Usuário encontrado: {} - Quantidade de colabs: {}", user, userColabs.size());
+        return new UserResponse(user.getUsername(), user.getCreatedAt(), userColabs);
+    }
+
+    private List<ColabResponse> getColabs(String userId) {
         log.info("Buscando colabs do usuário com id: {}", userId);
         List<Colab> colabs = colabRepository.findByUserIdOrderByCreatedAtDesc(userId);
         log.info("Colabs encontrados: {}", colabs.size());
@@ -77,32 +90,6 @@ public class ColabService {
         return colabRepository.findByIdLessThanOrderByCreatedAtDesc(id, PageRequest.of(0, limit));
     }
 
-    private  ColabResponse generateColabResponse(Colab colab) {
-
-        String imageUrl = cloudinaryService.getImageUrl(colab.getImageKey());
-        return new ColabResponse(
-                colab.getId(),
-                colab.getUserId(),
-                colab.getTitle(),
-                colab.getDescription(),
-                mapCategories(colab.getCategories()),
-                colab.getStatus(),
-                colab.getSupportCount(),
-                colab.getLocation(),
-                colab.getCreatedAt(),
-                colab.getUpdatedAt(),
-                imageUrl
-        );
-    }
-
-    private List<CategoryResponse> mapCategories(List<String> slugs) {
-        log.info("Mapeando categorias para slugs: {}", slugs);
-        List<CategoryResponse> categories = categoryService.getCategoriesById(slugs).stream()
-                .map(CategoryResponse::from)
-                .toList();
-        log.info("Categorias mapeadas: {}", categories);
-        return categories;
-    }
 
     public List<Colab> findAllColabs() {
         return (List<Colab>) colabRepository.findAll();

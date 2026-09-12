@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tech.cidade.colab.dto.request.CreateColabRequest;
 import tech.cidade.colab.dto.response.ColabResponse;
 import tech.cidade.colab.dto.response.UploadImageResponse;
+import tech.cidade.colab.dto.response.UserResponse;
 import tech.cidade.colab.service.ColabService;
 import tech.cidade.colab.service.SupportService;
 import tech.cidade.colab.service.CloudinaryService;
@@ -57,5 +58,11 @@ public class ColabController {
     public ResponseEntity<ColabResponse> getColab(@PathVariable String colabId) {
         ColabResponse colabResponse = colabService.getById(colabId);
         return ResponseEntity.ok(colabResponse);
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
+        UserResponse userResponse = colabService.getColabsByUserId(userId);
+        return ResponseEntity.ok(userResponse);
     }
 }
