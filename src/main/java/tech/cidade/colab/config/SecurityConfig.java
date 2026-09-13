@@ -42,8 +42,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/users", "/auth").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/feed", "/v1/categories", "/v1/colab/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/users", "/auth", "/auth/forgot-password", "/auth/reset-password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/feed", "/v1/categories", "/v1/colab/*", "/v1/colabs/search").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/colab/create")
                         .access(new WebExpressionAuthorizationManager("hasAuthority('ROLE_COLLABORATOR') and hasAuthority('PERM_colabs:create')"))
                         .requestMatchers(HttpMethod.PUT, "/v1/colab/support/*")

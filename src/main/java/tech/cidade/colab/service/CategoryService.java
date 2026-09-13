@@ -40,4 +40,21 @@ public class CategoryService {
         log.info("Categorias encontradas: {}", categories);
         return (List<Category>) categories;
     }
+
+    public void requireActiveSlugs(List<String> slugs) {
+        if (slugs == null || slugs.isEmpty()) {
+            return;
+        }
+
+        List<Category> found = getCategoriesById(slugs);
+        for (String slug : slugs) {
+            Category category = found.stream()
+                    .filter(item -> slug.equals(item.getSlug()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Categoria inexistente: " + slug));
+            if (!category.isActive()) {
+                throw new IllegalArgumentException("Categoria inexistente: " + slug);
+            }
+        }
+    }
 }
